@@ -10,8 +10,33 @@ from discord import app_commands
 from dotenv import load_dotenv
 from rapidfuzz import process, fuzz
 from opencc import OpenCC
+import asyncio
+from aiohttp import web
 
 
+async def health_check(request):
+    return web.Response(text="Discord bot is running.")
+
+
+async def start_web_server():
+    port = int(os.environ.get("PORT", 10000))
+
+    app = web.Application()
+    app.router.add_get("/", health_check)
+    app.router.add_get("/health", health_check)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+
+    site = web.TCPSite(
+        runner,
+        host="0.0.0.0",
+        port=port
+    )
+
+    await site.start()
+
+    print(f"Health check server started on port {port}")
 # =========================
 # 基本設定
 # =========================
@@ -483,7 +508,14 @@ async def reload_data(interaction: discord.Interaction):
         )
 
 
-if not TOKEN:
-    raise RuntimeError("找不到 DISCORD_TOKEN，請確認 .env 是否設定正確。")
+async def main():
+    if not TOKEN:
+        raise RuntimeError("找不到 DISCORD_TOKEN，請確認環境變數是否設定正確。")
+
+    async with client:
+        await start_web_server()
+        await client.start(TOKEN)
+
+asyncio.run(main())
 
 client.run(TOKEN)
