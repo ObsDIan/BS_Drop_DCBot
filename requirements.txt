@@ -2,3 +2,4 @@ discord.py
 rapidfuzz
 python-dotenv
 opencc-python-reimplemented
+aiohttp

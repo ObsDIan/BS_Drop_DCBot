@@ -517,5 +517,3 @@ async def main():
         await client.start(TOKEN)
 
 asyncio.run(main())
-
-client.run(TOKEN)
